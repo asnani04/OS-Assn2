@@ -8,12 +8,13 @@
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
+#include "syscall.h"
 #include "copyright.h"
 #include "system.h"
 #include "console.h"
 #include "addrspace.h"
 #include "synch.h"
-#include "syscall.h"
+//#include "start.o"
 
 //----------------------------------------------------------------------
 // StartUserProcess
@@ -45,6 +46,14 @@ StartUserProcess(char *filename)
 					// by doing the syscall "exit"
 }
 
+void
+ForkStartFunctionAgain (int dummy)
+{
+   currentThread->Startup();
+   machine->Run();
+}
+
+
 NachOSThread*
 makeThread(char *filename)
 {
@@ -62,6 +71,9 @@ makeThread(char *filename)
   
   space->InitUserCPURegisters();		// set the initial register values
   space->RestoreStateOnSwitch();		// load page table register
+  newThread->SaveUserState();
+  newThread->ResetReturnValue();
+  newThread->AllocateThreadStack(ForkStartFunctionAgain, 0);
   return newThread;
 }
 
@@ -108,8 +120,20 @@ EnqueueExecutables(char *filename)
       }
       lineCursor = lineCursor + 1;
     }
+    printf("here I am \n");
   }
-  
+  //NachOSThread *nextThread = scheduler->FindNextThreadToRun();
+  //if (nextThread != NULL) printf("we have a next thread. \n");
+  //scheduler->Schedule(nextThread);
+  printf("cp1");
+  int i, exitcode = 0;
+  exitThreadArray[0] = true;
+  //printf("cp2");
+  // Find out if all threads have called exit
+  for (i=0; i<thread_index; i++) {
+    if (!exitThreadArray[i]) break;
+  }
+  currentThread->Exit(i==thread_index, exitcode);
 }
 // Data structures needed for the console test.  Threads making
 // I/O requests wait on a Semaphore to delay until the I/O completes.

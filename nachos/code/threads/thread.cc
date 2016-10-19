@@ -218,6 +218,7 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
 
     threadToBeDestroyed = currentThread;
 
+    //printf("exit cp 1 \n");
     NachOSThread *nextThread;
 
     status = BLOCKED;
@@ -230,6 +231,7 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
        }
     }
 
+    //printf("exit cp 2 \n");
     while ((nextThread = scheduler->FindNextThreadToRun()) == NULL) {
         if (terminateSim) {
            DEBUG('i', "Machine idle.  No interrupts to do.\n");
@@ -239,6 +241,7 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
         }
         else interrupt->Idle();      // no one to run, wait for an interrupt
     }
+    //printf("exit cp 3 \n");
     scheduler->Schedule(nextThread); // returns when we've been signalled
 }
 

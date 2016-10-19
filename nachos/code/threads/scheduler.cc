@@ -102,6 +102,7 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     oldThread->CheckOverflow();		    // check if the old thread
 					    // had an undetected stack overflow
 
+    //printf("schedule cp 1\n");
     currentThread = nextThread;		    // switch to the next thread
     currentThread->setStatus(RUNNING);      // nextThread is now running
     
@@ -113,6 +114,7 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     // a bit to figure out what happens after this, both from the point
     // of view of the thread and from the perspective of the "outside world".
 
+    //printf("schedule cp 2\n");
     _SWITCH(oldThread, nextThread);
     
     DEBUG('t', "Now in thread \"%s\" with pid %d\n", currentThread->getName(), currentThread->GetPID());
@@ -121,6 +123,8 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     // we need to delete its carcass.  Note we cannot delete the thread
     // before now (for example, in NachOSThread::FinishThread()), because up to this
     // point, we were still running on the old thread's stack!
+    //printf("schedule cp 3\n");
+    
     if (threadToBeDestroyed != NULL) {
         delete threadToBeDestroyed;
 	threadToBeDestroyed = NULL;

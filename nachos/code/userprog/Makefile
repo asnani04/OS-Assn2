@@ -42,7 +42,8 @@ main.o: ../threads/main.cc /usr/include/stdc-predef.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
  ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
- ../machine/stats.h ../machine/timer.h
+ ../machine/stats.h ../machine/timer.h ../userprog/syscall.h
+start.o: ../userprog/start.s
 list.o: ../threads/list.cc /usr/include/stdc-predef.h \
  ../threads/copyright.h ../threads/list.h ../threads/utility.h \
  ../machine/sysdep.h ../threads/copyright.h /usr/include/stdio.h \
@@ -301,9 +302,9 @@ exception.o: ../userprog/exception.cc /usr/include/stdc-predef.h \
  ../machine/timer.h ../userprog/syscall.h ../machine/console.h \
  ../threads/synch.h
 progtest.o: ../userprog/progtest.cc /usr/include/stdc-predef.h \
- ../threads/copyright.h ../threads/system.h ../threads/copyright.h \
- ../threads/utility.h ../machine/sysdep.h /usr/include/stdio.h \
- /usr/include/features.h /usr/include/sys/cdefs.h \
+ ../userprog/syscall.h ../threads/copyright.h ../threads/system.h \
+ ../threads/copyright.h ../threads/utility.h ../machine/sysdep.h \
+ /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-32.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h \
