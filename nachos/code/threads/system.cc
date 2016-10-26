@@ -25,6 +25,7 @@ unsigned thread_index;                  // Index into this array (also used to a
 bool initializedConsoleSemaphores;
 bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 
+int schedAlg;
 TimeSortedWaitQueue *sleepQueueHead;    // Needed to implement SC_Sleep
 
 #ifdef FILESYS_NEEDED
@@ -77,7 +78,9 @@ TimerInterruptHandler(int dummy)
            delete ptr;
         }
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
-        interrupt->YieldOnReturn();
+	//printf("Timer handler yielding!, schedAlg= %d\n", schedAlg);
+	if (schedAlg != 0 && schedAlg != 1)
+	  interrupt->YieldOnReturn();
     }
 }
 
@@ -160,7 +163,7 @@ Initialize(int argc, char **argv)
     scheduler = new NachOSscheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
 	timer = new Timer(TimerInterruptHandler, 0, randomYield);
-
+	schedAlg = 0;
     threadToBeDestroyed = NULL;
 
     // We didn't explicitly allocate the current thread we are running in.

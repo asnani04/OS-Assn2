@@ -83,11 +83,18 @@ EnqueueExecutables(char *filename)
   OpenFile *listFile = fileSystem->Open(filename);
   char line[80], exec[80];
   int res = 80, priority = -1, lineCursor=0, execCursor=0, p=0;
+  
+  res = listFile->Read(line, 2);
+
+  schedAlg = line[lineCursor] - '0';
+  //printf("This byte is: %c", line[lineCursor]);
+
   while(res!= 0) {
     lineCursor = 0;
     res = listFile->Read(line, 80);
     //printf("The line read is: %s", line);
     printf("Number of bytes read: %d\n", res);
+
     while(lineCursor != res) {
       if(line[lineCursor] == '\n') {
 	if (p == 0 || priority == -1 || priority == 0)
@@ -105,6 +112,7 @@ EnqueueExecutables(char *filename)
 	execCursor = 0;
 	priority = -1;
 	p = 0;
+	
       }
       else if (line[lineCursor] == ' ') {
 	p = 1;
