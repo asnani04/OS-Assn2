@@ -79,7 +79,7 @@ TimerInterruptHandler(int dummy)
         }
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
 	//printf("Timer handler yielding!, schedAlg= %d\n", schedAlg);
-	if (schedAlg != 0 && schedAlg != 1)
+	if (schedAlg > 2)
 	  interrupt->YieldOnReturn();
     }
 }
@@ -171,7 +171,7 @@ Initialize(int argc, char **argv)
     // object to save its state. 
     currentThread = new NachOSThread("main");		
     currentThread->setStatus(RUNNING);
-
+    currentThread->runningStart = stats->totalTicks;
     interrupt->Enable();
     CallOnUserAbort(Cleanup);			// if user hits ctl-C
     

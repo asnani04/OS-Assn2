@@ -236,3 +236,14 @@ List::SortedRemove(int *keyPtr)
     return thing;
 }
 
+void
+List::PrintPredBursts()
+{
+  ListElement *element = first;
+  while(element != NULL)
+    {
+      printf("Element %d\n", element->key);
+      element = element->next;
+    }
+
+}

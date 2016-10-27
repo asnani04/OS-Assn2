@@ -56,7 +56,19 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
     DEBUG('t', "Putting thread %s with PID %d on ready list.\n", thread->getName(), thread->GetPID());
 
     thread->setStatus(READY);
-    readyThreadList->Append((void *)thread);
+    if (thread->runningStart != 0) {
+      thread->runningEnd = stats->totalTicks;
+      thread->previousBurst = thread->runningEnd - thread->runningStart;
+      thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
+      thread->runningStart = 0;
+    }
+    if (schedAlg == 2) {
+      //printf("PredBurst %d\n", thread->predBurst);
+      readyThreadList->SortedInsert((void *)thread, thread->predBurst);
+    }
+    else if (schedAlg == 1) {
+      readyThreadList->Append((void *)thread);
+    }
 }
 
 //----------------------------------------------------------------------
@@ -70,7 +82,17 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
 NachOSThread *
 NachOSscheduler::FindNextThreadToRun ()
 {
-    return (NachOSThread *)readyThreadList->Remove();
+  if (schedAlg == 2) {
+    NachOSThread *nextThread = (NachOSThread *)readyThreadList->SortedRemove(NULL);
+    if (nextThread != NULL) {
+      //printf("Next predBurst: %d\n", nextThread->predBurst);
+      //printf("This predBurst: %d\n", currentThread->predBurst);
+      //scheduler->Print();
+      //readyThreadList->PrintPredBursts();
+    }
+    return nextThread;
+  }
+  return (NachOSThread *)readyThreadList->Remove();
 }
 
 //----------------------------------------------------------------------
@@ -109,6 +131,8 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     DEBUG('t', "Switching from thread \"%s\" with pid %d to thread \"%s\" with pid %d\n",
 	  oldThread->getName(), oldThread->GetPID(), nextThread->getName(), nextThread->GetPID());
     
+    //printf("Switching from thread \"%s\" with pid %d to thread \"%s\" with pid %d\n",
+    //	  oldThread->getName(), oldThread->GetPID(), nextThread->getName(), nextThread->GetPID());
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point
@@ -117,6 +141,8 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     //printf("schedule cp 2\n");
     _SWITCH(oldThread, nextThread);
     
+    currentThread->runningStart = stats->totalTicks;
+
     DEBUG('t', "Now in thread \"%s\" with pid %d\n", currentThread->getName(), currentThread->GetPID());
 
     // If the old thread gave up the processor because it was finishing,

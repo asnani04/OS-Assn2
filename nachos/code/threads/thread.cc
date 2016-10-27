@@ -61,6 +61,11 @@ NachOSThread::NachOSThread(char* threadName)
     for (i=0; i<MAX_CHILD_COUNT; i++) exitedChild[i] = false;
 
     instructionCount = 0;
+    runningStart = 0;
+    runningEnd = 0;
+    runningTime = 0;
+    predBurst = 1;
+    previousBurst = 0;
 }
 
 //----------------------------------------------------------------------
@@ -222,6 +227,13 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
     NachOSThread *nextThread;
 
     status = BLOCKED;
+    if (runningStart != 0) {
+      runningEnd = stats->totalTicks;
+      previousBurst = runningEnd - runningStart;
+      //printf("Prev Burst %d\n", previousBurst);
+      predBurst = (predBurst + previousBurst) / 2;
+      runningStart = 0;
+    }
 
     // Set exit code in parent's structure provided the parent hasn't exited
     if (ppid != -1) {
@@ -276,6 +288,7 @@ NachOSThread::YieldCPU ()
     nextThread = scheduler->FindNextThreadToRun();
     if (nextThread != NULL) {
 	scheduler->ThreadIsReadyToRun(this);
+	printf("Inside Yield CPU!\n");
 	scheduler->Schedule(nextThread);
     }
     (void) interrupt->SetLevel(oldLevel);
@@ -311,9 +324,17 @@ NachOSThread::PutThreadToSleep ()
     DEBUG('t', "Sleeping thread \"%s\" with pid %d\n", getName(), pid);
 
     status = BLOCKED;
+    if (runningStart != 0) {
+      runningEnd = stats->totalTicks;
+      previousBurst = runningEnd - runningStart;
+      //printf("Prev Burst %d\n", previousBurst);
+      predBurst = (predBurst + previousBurst) / 2;
+      runningStart = 0;
+    }
     while ((nextThread = scheduler->FindNextThreadToRun()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
-        
+    
+    // printf("Inside Put Thread to Sleep \n");
     scheduler->Schedule(nextThread); // returns when we've been signalled
 }
 
@@ -539,6 +560,7 @@ NachOSThread::SortedInsertInWaitQueue (unsigned when)
 
    IntStatus oldLevel = interrupt->SetLevel(IntOff);
    //printf("[pid %d] Going to sleep at %d.\n", pid, stats->totalTicks);
+   //printf("checkpoint \n");
    PutThreadToSleep();
    //printf("[pid %d] Returned from sleep at %d.\n", pid, stats->totalTicks);
    (void) interrupt->SetLevel(oldLevel);

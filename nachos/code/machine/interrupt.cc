@@ -173,6 +173,7 @@ Interrupt::OneTick()
 					// for a context switch, ok to do it now
 	yieldOnReturn = FALSE;
  	status = SystemMode;		// yield is a kernel routine
+	//printf("yielding CPU!\n");
 	currentThread->YieldCPU();
 	status = old;
     }

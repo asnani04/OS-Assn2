@@ -134,6 +134,12 @@ class NachOSThread {
 
     void IncInstructionCount();
     unsigned GetInstructionCount();
+    
+    int runningStart;
+    int runningEnd;
+    int runningTime ;
+    int previousBurst;
+    int predBurst;
 
   private:
     // some of the private data for this class is listed above
