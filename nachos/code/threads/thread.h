@@ -86,7 +86,7 @@ class NachOSThread {
     
     int runningStart;
     int runningEnd;
-    int runningTime ;
+    bool currentlyRunning ;
     int previousBurst;
     int predBurst;
     unsigned waitBegin;
@@ -102,6 +102,7 @@ class NachOSThread {
 					// must not be running when delete 
 					// is called
 
+    //int currentRunning;
     // basic thread operations
 
     void ThreadFork(VoidFunctionPtr func, int arg); 	// Make thread run (*func)(arg)

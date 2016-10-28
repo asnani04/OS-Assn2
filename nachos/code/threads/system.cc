@@ -49,6 +49,8 @@ unsigned minThreadCom = 0;
 double avgThreadCom = 0.0;
 double varThreadCom = 0.0;
 
+unsigned timeQuantum = 50;
+
 TimeSortedWaitQueue *sleepQueueHead;    // Needed to implement SC_Sleep
 
 #ifdef FILESYS_NEEDED
@@ -102,6 +104,28 @@ TimerInterruptHandler(int dummy)
         }
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
 	//printf("Timer handler yielding!, schedAlg= %d\n", schedAlg);
+	if ((schedAlg >= 7 && schedAlg <= 10) && ((stats->totalTicks - currentThread->runningStart) >= timeQuantum) && currentThread->currentlyRunning == true) {
+	  //printf("Condition Fulfilled!, %d\n", stats->totalTicks - currentThread->runningStart);
+	  NachOSThread *thread = currentThread;
+	  if (thread->currentlyRunning == true && thread->runningStart != stats->totalTicks) {
+	    thread->runningEnd = stats->totalTicks;
+	    thread->previousBurst = thread->runningEnd - thread->runningStart;
+	    totalBusyTime+= (thread->previousBurst);
+	    
+	    if (thread->previousBurst > maxBurst) {
+	      maxBurst = thread->previousBurst;
+	    }
+	    if (thread->previousBurst < minBurst) {
+	      minBurst = thread->previousBurst;
+	    }
+	    numBurst += 1;
+	    
+	    thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
+	  }
+	  
+	  thread->currentlyRunning = false;
+	  interrupt->YieldOnReturn();
+	}
 	if (schedAlg > 2)
 	  interrupt->YieldOnReturn();
     }

@@ -56,10 +56,10 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
     DEBUG('t', "Putting thread %s with PID %d on ready list.\n", thread->getName(), thread->GetPID());
 
     thread->setStatus(READY);
-    if (thread->runningStart != 0) {
+    if (thread->currentlyRunning == true && thread->runningStart != stats->totalTicks) {
       thread->runningEnd = stats->totalTicks;
       thread->previousBurst = thread->runningEnd - thread->runningStart;
-      totalBusyTime += thread->previousBurst;
+      totalBusyTime+= (thread->previousBurst);
       
       if (thread->previousBurst > maxBurst) {
 	maxBurst = thread->previousBurst;
@@ -70,8 +70,10 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
       numBurst += 1;
 
       thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
-      thread->runningStart = 0;
     }
+
+    thread->currentlyRunning = false;
+
     if (schedAlg == 2) {
       //printf("PredBurst %d\n", thread->predBurst);
       readyThreadList->SortedInsert((void *)thread, thread->predBurst);
@@ -80,7 +82,7 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
 
     if (schedAlg >= 7 && schedAlg <= 10) {
       readyThreadList->SortedInsert((void *)thread, 
-				    basePriorities[thread->GetPID()] + cpuUsage[thread->GetPID()]);
+				    basePriorities[thread->GetPID()]+cpuUsage[thread->GetPID()]/2);
     }
     else if (schedAlg == 1) {
       readyThreadList->Append((void *)thread);
@@ -149,6 +151,7 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     currentThread = nextThread;		    // switch to the next thread
     currentThread->setStatus(RUNNING);      // nextThread is now running
     //oldThread->getStatus();
+    oldThread->currentlyRunning = false;
 
     DEBUG('t', "Switching from thread \"%s\" with pid %d to thread \"%s\" with pid %d\n",
 	  oldThread->getName(), oldThread->GetPID(), nextThread->getName(), nextThread->GetPID());
@@ -164,6 +167,18 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     _SWITCH(oldThread, nextThread);
     
     currentThread->runningStart = stats->totalTicks;
+    currentThread->currentlyRunning = true;
+
+    if (schedAlg >= 7 && schedAlg <= 10) {
+      int i;
+      cpuUsage[oldThread->GetPID()] += timeQuantum;
+      for (i = 0; i<MAX_THREAD_COUNT; i++) {
+	
+	cpuUsage[i] = cpuUsage[i] / 2;
+      }
+      
+      readyThreadList->changePriorities();
+    }
 
     DEBUG('t', "Now in thread \"%s\" with pid %d\n", currentThread->getName(), currentThread->GetPID());
 

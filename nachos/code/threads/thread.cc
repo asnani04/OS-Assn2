@@ -66,7 +66,7 @@ NachOSThread::NachOSThread(char* threadName)
     instructionCount = 0;
     runningStart = 0;
     runningEnd = 0;
-    runningTime = 0;
+    currentlyRunning = false;
     predBurst = 1;
     previousBurst = 0;
     //hulla = 0;
@@ -238,7 +238,8 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
     NachOSThread *nextThread;
 
     status = BLOCKED;
-    if (runningStart != 0 && runningStart != stats->totalTicks) {
+
+    if (currentlyRunning == true && runningStart != stats->totalTicks) {
       runningEnd = stats->totalTicks;
       previousBurst = runningEnd - runningStart;
       totalBusyTime += previousBurst;
@@ -251,8 +252,8 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
       numBurst += 1;
       //printf("Prev Burst %d\n", previousBurst);
       predBurst = (predBurst + previousBurst) / 2;
-      runningStart = 0;
     }
+    currentlyRunning = false;
 
     // Set exit code in parent's structure provided the parent hasn't exited
     if (ppid != -1) {
@@ -307,7 +308,7 @@ NachOSThread::YieldCPU ()
     nextThread = scheduler->FindNextThreadToRun();
     if (nextThread != NULL) {
 	scheduler->ThreadIsReadyToRun(this);
-	printf("Inside Yield CPU!\n");
+	//printf("Inside Yield CPU!\n");
 	scheduler->Schedule(nextThread);
     }
     (void) interrupt->SetLevel(oldLevel);
@@ -343,7 +344,7 @@ NachOSThread::PutThreadToSleep ()
     DEBUG('t', "Sleeping thread \"%s\" with pid %d\n", getName(), pid);
 
     status = BLOCKED;
-    if (runningStart != 0 && stats->totalTicks != runningStart) {
+    if (currentlyRunning == true && stats->totalTicks != runningStart) {
       runningEnd = stats->totalTicks;
       previousBurst = runningEnd - runningStart;
       totalBusyTime += previousBurst;
@@ -356,8 +357,9 @@ NachOSThread::PutThreadToSleep ()
       numBurst += 1;
       //printf("Prev Burst %d\n", previousBurst);
       predBurst = (predBurst + previousBurst) / 2;
-      runningStart = 0;
     }
+    currentlyRunning = false;
+
     while ((nextThread = scheduler->FindNextThreadToRun()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
     

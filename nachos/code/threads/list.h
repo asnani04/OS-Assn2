@@ -59,6 +59,8 @@ class List {
     void *SortedRemove(int *keyPtr); 	  	// Remove first item from list
 
     void PrintPredBursts();
+    
+    void changePriorities();
   private:
     ListElement *first;  	// Head of the list, NULL if list is empty
     ListElement *last;		// Last element of list

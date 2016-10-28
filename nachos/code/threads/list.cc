@@ -18,6 +18,7 @@
 #include "copyright.h"
 #include "list.h"
 #include "thread.h"
+#include "system.h"
 
 //----------------------------------------------------------------------
 // ListElement::ListElement
@@ -255,4 +256,23 @@ List::PrintPredBursts()
       element = element->next;
     }
 
+}
+
+
+void
+List::changePriorities()
+{
+  ListElement *element = first;
+  if (IsEmpty()) {
+    return;
+  }
+  printf("Selected Thread %d, Priority: %d", currentThread->GetPID(), basePriorities[currentThread->GetPID()] + cpuUsage[currentThread->GetPID()]/2);  
+  while(element!=NULL)
+    {
+      NachOSThread *thread = (NachOSThread *) element->item;
+      int pid = thread->GetPID();
+      element->key = basePriorities[pid] + cpuUsage[pid]/2;
+      printf("Thread %d has priority %d\n", pid, element->key);
+      element = element->next;
+    }
 }
