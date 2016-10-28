@@ -45,6 +45,7 @@ extern double avgBurst;
 extern unsigned totalWait;
 extern unsigned numWaits;
 extern unsigned timeQuantum;
+extern double avgWait;
 
 extern NachOSThread *threadArray[];  			// Array of thread pointers
 extern int cpuUsage[];

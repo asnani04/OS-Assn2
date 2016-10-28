@@ -69,6 +69,7 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
       }
       numBurst += 1;
 
+      thread->waitBegin = stats->totalTicks;
       thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
     }
 
@@ -84,7 +85,7 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
       readyThreadList->SortedInsert((void *)thread, 
 				    basePriorities[thread->GetPID()]+cpuUsage[thread->GetPID()]/2);
     }
-    else if (schedAlg == 1) {
+    else if (schedAlg == 1 || (schedAlg >= 3 && schedAlg <= 6)) {
       readyThreadList->Append((void *)thread);
     }
 }
@@ -149,6 +150,9 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
 
     //printf("schedule cp 1\n");
     currentThread = nextThread;		    // switch to the next thread
+    currentThread->waitEnd = stats->totalTicks;
+    totalWait += currentThread->waitEnd - currentThread->waitBegin;
+    numWaits += 1;
     currentThread->setStatus(RUNNING);      // nextThread is now running
     //oldThread->getStatus();
     oldThread->currentlyRunning = false;

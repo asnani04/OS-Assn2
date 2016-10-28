@@ -41,12 +41,13 @@ static void TimerHandler(int arg)
 //		at random, instead of fixed, intervals.
 //----------------------------------------------------------------------
 
-Timer::Timer(VoidFunctionPtr timerHandler, int callArg, bool doRandom)
+Timer::Timer(VoidFunctionPtr timerHandler, int callArg, bool doRandom,int quantum)
 {
     randomize = doRandom;
     handler = timerHandler;
     arg = callArg; 
-
+    interval=quantum;
+	printf("quantum %d",quantum);	
     // schedule the first interrupt from the timer device
     interrupt->Schedule(TimerHandler, (int) this, TimeOfNextInterrupt(), 
 		TimerInt); 
@@ -81,5 +82,5 @@ Timer::TimeOfNextInterrupt()
     if (randomize)
 	return 1 + (Random() % (TimerTicks * 2));
     else
-	return TimerTicks; 
+	return interval; 
 }

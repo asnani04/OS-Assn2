@@ -41,6 +41,9 @@ Statistics::Print()
   printf("Total Number of CPU Bursts: %d\n", numBurst);
   avgBurst = (double) totalBusyTime / numBurst;
   printf("Max, min and avg Bursts: %d, %d, %lf\n", maxBurst, minBurst, avgBurst);
+  printf("Total Wait Time: %d, Number of Waits: %d\n" , totalWait, numWaits);
+  avgWait = (double) totalWait / numWaits ;
+  printf("Avg Wait Time: %lf\n", avgWait);
 
   printf("Ticks: total %d, idle %d, system %d, user %d\n", totalTicks, 
 	idleTicks, systemTicks, userTicks);

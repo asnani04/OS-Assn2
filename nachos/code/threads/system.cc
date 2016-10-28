@@ -28,7 +28,8 @@ bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 int schedAlg;
 int basePriorities[MAX_THREAD_COUNT];
 int cpuUsage[MAX_THREAD_COUNT];
-
+int quantum = 100;
+//int avgBurstTestLoop=120;
 unsigned totalBusyTime = 0;
 unsigned beginExecTime = 0;
 unsigned totalExecTime = 0;
@@ -90,46 +91,46 @@ extern void Cleanup();
 //	"dummy" is because every interrupt handler takes one argument,
 //		whether it needs it or not.
 //----------------------------------------------------------------------
-static void
-TimerInterruptHandler(int dummy)
-{
-    TimeSortedWaitQueue *ptr;
-    if (interrupt->getStatus() != IdleMode) {
-        // Check the head of the sleep queue
-        while ((sleepQueueHead != NULL) && (sleepQueueHead->GetWhen() <= (unsigned)stats->totalTicks)) {
-           sleepQueueHead->GetThread()->Schedule();
-           ptr = sleepQueueHead;
-           sleepQueueHead = sleepQueueHead->GetNext();
-           delete ptr;
-        }
-        //printf("[%d] Timer interrupt.\n", stats->totalTicks);
-	//printf("Timer handler yielding!, schedAlg= %d\n", schedAlg);
-	if ((schedAlg >= 7 && schedAlg <= 10) && ((stats->totalTicks - currentThread->runningStart) >= timeQuantum) && currentThread->currentlyRunning == true) {
-	  //printf("Condition Fulfilled!, %d\n", stats->totalTicks - currentThread->runningStart);
-	  NachOSThread *thread = currentThread;
-	  if (thread->currentlyRunning == true && thread->runningStart != stats->totalTicks) {
-	    thread->runningEnd = stats->totalTicks;
-	    thread->previousBurst = thread->runningEnd - thread->runningStart;
-	    totalBusyTime+= (thread->previousBurst);
+// static void
+// TimerInterruptHandler(int dummy)
+// {
+//     TimeSortedWaitQueue *ptr;
+//     if (interrupt->getStatus() != IdleMode) {
+//         // Check the head of the sleep queue
+//         while ((sleepQueueHead != NULL) && (sleepQueueHead->GetWhen() <= (unsigned)stats->totalTicks)) {
+//            sleepQueueHead->GetThread()->Schedule();
+//            ptr = sleepQueueHead;
+//            sleepQueueHead = sleepQueueHead->GetNext();
+//            delete ptr;
+//         }
+//         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
+// 	//printf("Timer handler yielding!, schedAlg= %d\n", schedAlg);
+// 	if ((schedAlg >= 7 && schedAlg <= 10) && ((stats->totalTicks - currentThread->runningStart) >= timeQuantum) && currentThread->currentlyRunning == true) {
+// 	  //printf("Condition Fulfilled!, %d\n", stats->totalTicks - currentThread->runningStart);
+// 	  NachOSThread *thread = currentThread;
+// 	  if (thread->currentlyRunning == true && thread->runningStart != stats->totalTicks) {
+// 	    thread->runningEnd = stats->totalTicks;
+// 	    thread->previousBurst = thread->runningEnd - thread->runningStart;
+// 	    totalBusyTime+= (thread->previousBurst);
 	    
-	    if (thread->previousBurst > maxBurst) {
-	      maxBurst = thread->previousBurst;
-	    }
-	    if (thread->previousBurst < minBurst) {
-	      minBurst = thread->previousBurst;
-	    }
-	    numBurst += 1;
+// 	    if (thread->previousBurst > maxBurst) {
+// 	      maxBurst = thread->previousBurst;
+// 	    }
+// 	    if (thread->previousBurst < minBurst) {
+// 	      minBurst = thread->previousBurst;
+// 	    }
+// 	    numBurst += 1;
 	    
-	    thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
-	  }
+// 	    thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
+// 	  }
 	  
-	  thread->currentlyRunning = false;
-	  interrupt->YieldOnReturn();
-	}
-	if (schedAlg > 2)
-	  interrupt->YieldOnReturn();
-    }
-}
+// 	  thread->currentlyRunning = false;
+// 	  interrupt->YieldOnReturn();
+// 	}
+// 	if (schedAlg > 2)
+// 	  interrupt->YieldOnReturn();
+//     }
+// }
 
 //----------------------------------------------------------------------
 // Initialize
@@ -213,7 +214,8 @@ Initialize(int argc, char **argv)
     interrupt = new Interrupt;			// start up interrupt handling
     scheduler = new NachOSscheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
-    timer = new Timer(TimerInterruptHandler, 0, randomYield);
+
+    //timer = new Timer(TimerInterruptHandler, 0, randomYield,quantum);
     schedAlg = 1;
     threadToBeDestroyed = NULL;
 

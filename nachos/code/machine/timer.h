@@ -26,7 +26,7 @@
 // The following class defines a hardware timer. 
 class Timer {
   public:
-    Timer(VoidFunctionPtr timerHandler, int callArg, bool doRandom);
+    Timer(VoidFunctionPtr timerHandler, int callArg, bool doRandom, int quantum);
 				// Initialize the timer, to call the interrupt
 				// handler "timerHandler" every time slice.
     ~Timer() {}
@@ -43,7 +43,7 @@ class Timer {
     bool randomize;		// set if we need to use a random timeout delay
     VoidFunctionPtr handler;	// timer interrupt handler 
     int arg;			// argument to pass to interrupt handler
-
+    int interval;  //Interval to send the interrupt 
 };
 
 #endif // TIMER_H

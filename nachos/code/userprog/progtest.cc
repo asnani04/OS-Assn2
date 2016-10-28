@@ -46,6 +46,48 @@ StartUserProcess(char *filename)
 					// by doing the syscall "exit"
 }
 
+static void
+algIntHandler(int dummy)
+{
+    TimeSortedWaitQueue *ptr;
+    if (interrupt->getStatus() != IdleMode) {
+        // Check the head of the sleep queue
+        while ((sleepQueueHead != NULL) && (sleepQueueHead->GetWhen() <= (unsigned)stats->totalTicks)) {
+           sleepQueueHead->GetThread()->Schedule();
+           ptr = sleepQueueHead;
+           sleepQueueHead = sleepQueueHead->GetNext();
+           delete ptr;
+        }
+        //printf("[%d] Timer interrupt.\n", stats->totalTicks);
+	//printf("Timer handler yielding!, schedAlg= %d\n", schedAlg);
+	if ((schedAlg >= 7 && schedAlg <= 10) && ((stats->totalTicks - currentThread->runningStart) >= timeQuantum) && currentThread->currentlyRunning == true) {
+	  //printf("Condition Fulfilled!, %d\n", stats->totalTicks - currentThread->runningStart);
+	  NachOSThread *thread = currentThread;
+	  if (thread->currentlyRunning == true && thread->runningStart != stats->totalTicks) {
+	    thread->runningEnd = stats->totalTicks;
+	    thread->previousBurst = thread->runningEnd - thread->runningStart;
+	    totalBusyTime+= (thread->previousBurst);
+	    
+	    if (thread->previousBurst > maxBurst) {
+	      maxBurst = thread->previousBurst;
+	    }
+	    if (thread->previousBurst < minBurst) {
+	      minBurst = thread->previousBurst;
+	    }
+	    numBurst += 1;
+	    
+	    thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
+	  }
+	  
+	  thread->currentlyRunning = false;
+	  interrupt->YieldOnReturn();
+	}
+	if (schedAlg > 2)
+	  interrupt->YieldOnReturn();
+    }
+}
+
+
 void
 ForkStartFunctionAgain (int dummy)
 {
@@ -82,12 +124,18 @@ void
 EnqueueExecutables(char *filename)
 {
   OpenFile *listFile = fileSystem->Open(filename);
+  int avgBurstTestLoop = 120, quantum;
   char line[80], exec[80];
   int res = 80, priority = -1, lineCursor=0, execCursor=0, p=0;
   
   res = listFile->Read(line, 2);
 
   schedAlg = line[lineCursor] - '0';
+  if (schedAlg == 1 && (line[lineCursor+1] - '0' == 0)) {
+    printf("Entered here\n");
+    res = listFile->Read(line, 1);
+    schedAlg = 10;
+  } 
   //printf("This byte is: %c", line[lineCursor]);
 
   while(res!= 0) {
@@ -145,6 +193,39 @@ EnqueueExecutables(char *filename)
     if (!exitThreadArray[i]) break;
   }
   beginExecTime = stats->totalTicks;
+  switch(schedAlg){
+  case 1:
+    quantum=100;
+    break;
+  case 2:
+    quantum=100;
+    break;
+  case 3:
+    quantum=avgBurstTestLoop/4;
+    break;
+  case 4:
+    quantum=avgBurstTestLoop/2;
+    break;
+  case 5:
+    quantum=3*avgBurstTestLoop/4;
+    break;
+  case 6:
+    quantum=30; //just a guess for now
+    break;
+  case 7:
+    quantum=avgBurstTestLoop/4;
+    break;
+  case 8:
+    quantum=avgBurstTestLoop/2;
+    break;
+  case 9:
+    quantum=3*avgBurstTestLoop/4;
+    break;
+  case 10:
+    quantum=30; //just a guess for now
+    break;
+  }
+  timer = new Timer(algIntHandler, 0, false, quantum);
   currentThread->Exit(i==thread_index, exitcode);
 }
 // Data structures needed for the console test.  Threads making
