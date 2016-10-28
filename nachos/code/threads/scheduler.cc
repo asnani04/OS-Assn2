@@ -60,6 +60,7 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
       thread->runningEnd = stats->totalTicks;
       thread->previousBurst = thread->runningEnd - thread->runningStart;
       totalBusyTime += thread->previousBurst;
+      thread->waitBegin = stats->totalTicks;
       
       if (thread->previousBurst > maxBurst) {
 	maxBurst = thread->previousBurst;
@@ -137,6 +138,9 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
 
     //printf("schedule cp 1\n");
     currentThread = nextThread;		    // switch to the next thread
+    currentThread->waitEnd = stats->totalTicks;
+    totalWait = totalWait + (currentThread->waitEnd - currentThread->waitBegin);
+    numWaits++;
     currentThread->setStatus(RUNNING);      // nextThread is now running
     //oldThread->getStatus();
 
