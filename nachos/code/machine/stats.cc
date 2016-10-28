@@ -9,6 +9,7 @@
 
 #include "copyright.h"
 #include "utility.h"
+#include "system.h"
 #include "stats.h"
 
 //----------------------------------------------------------------------
@@ -33,7 +34,15 @@ Statistics::Statistics()
 void
 Statistics::Print()
 {
-    printf("Ticks: total %d, idle %d, system %d, user %d\n", totalTicks, 
+  printf("Total CPU Busy Time: %d\n", totalBusyTime);
+  printf("Total CPU Execution Time: %d\n", totalExecTime);
+  CPUutil = (double) totalBusyTime * 100.0 / totalExecTime ;
+  printf("CPU utilization: %lf\n", CPUutil);
+  printf("Total Number of CPU Bursts: %d\n", numBurst);
+  avgBurst = (double) totalBusyTime / numBurst;
+  printf("Max, min and avg Bursts: %d, %d, %lf\n", maxBurst, minBurst, avgBurst);
+
+  printf("Ticks: total %d, idle %d, system %d, user %d\n", totalTicks, 
 	idleTicks, systemTicks, userTicks);
     printf("Disk I/O: reads %d, writes %d\n", numDiskReads, numDiskWrites);
     printf("Console I/O: reads %d, writes %d\n", numConsoleCharsRead, 

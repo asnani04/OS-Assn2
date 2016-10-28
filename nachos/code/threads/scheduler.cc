@@ -59,12 +59,23 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
     if (thread->runningStart != 0) {
       thread->runningEnd = stats->totalTicks;
       thread->previousBurst = thread->runningEnd - thread->runningStart;
+      totalBusyTime += thread->previousBurst;
+      
+      if (thread->previousBurst > maxBurst) {
+	maxBurst = thread->previousBurst;
+      }
+      if (thread->previousBurst < minBurst) {
+	minBurst = thread->previousBurst;
+      }
+      numBurst += 1;
+
       thread->predBurst = (thread->predBurst + thread->previousBurst) / 2;
       thread->runningStart = 0;
     }
     if (schedAlg == 2) {
       //printf("PredBurst %d\n", thread->predBurst);
       readyThreadList->SortedInsert((void *)thread, thread->predBurst);
+      //printf("Inserting thread %d with burst %d in Ready List.\n", thread->GetPID(), thread->predBurst);
     }
     else if (schedAlg == 1) {
       readyThreadList->Append((void *)thread);
@@ -84,11 +95,11 @@ NachOSscheduler::FindNextThreadToRun ()
 {
   if (schedAlg == 2) {
     NachOSThread *nextThread = (NachOSThread *)readyThreadList->SortedRemove(NULL);
+    //readyThreadList->PrintPredBursts();
     if (nextThread != NULL) {
       //printf("Next predBurst: %d\n", nextThread->predBurst);
       //printf("This predBurst: %d\n", currentThread->predBurst);
-      //scheduler->Print();
-      //readyThreadList->PrintPredBursts();
+      //Print();
     }
     return nextThread;
   }
@@ -127,7 +138,8 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     //printf("schedule cp 1\n");
     currentThread = nextThread;		    // switch to the next thread
     currentThread->setStatus(RUNNING);      // nextThread is now running
-    
+    //oldThread->getStatus();
+
     DEBUG('t', "Switching from thread \"%s\" with pid %d to thread \"%s\" with pid %d\n",
 	  oldThread->getName(), oldThread->GetPID(), nextThread->getName(), nextThread->GetPID());
     

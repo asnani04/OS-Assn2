@@ -55,7 +55,7 @@ ForkStartFunctionAgain (int dummy)
 
 
 NachOSThread*
-makeThread(char *filename)
+makeThread(char *filename, unsigned thread_index)
 {
   OpenFile *executable = fileSystem->Open(filename);
   ProcessAddrSpace *space;
@@ -65,7 +65,8 @@ makeThread(char *filename)
     return NULL;
   }
   space = new ProcessAddrSpace(executable);
-  NachOSThread* newThread = new NachOSThread("newthread");
+  char threadName[12] = {'n', 'e', 'w', 't', 'h', 'r', 'e', 'a', 'd', ' ', thread_index + '0', '\0'}; 
+  NachOSThread* newThread = new NachOSThread(" ");
   newThread->space = space;
   delete executable;			// close file
   
@@ -100,8 +101,8 @@ EnqueueExecutables(char *filename)
 	if (p == 0 || priority == -1 || priority == 0)
 	  priority = 100;
 	
-	NachOSThread* thread = makeThread(exec);
-	scheduler->ThreadIsReadyToRun(thread);
+	NachOSThread* thread = makeThread(exec, thread_index);
+	thread->Schedule();
 	
 	printf("executable: %s, execCursor: %d, priority: %d\n", exec, execCursor, priority);
 	for (int i=0; i<execCursor; i++)
@@ -133,7 +134,7 @@ EnqueueExecutables(char *filename)
   //NachOSThread *nextThread = scheduler->FindNextThreadToRun();
   //if (nextThread != NULL) printf("we have a next thread. \n");
   //scheduler->Schedule(nextThread);
-  printf("cp1");
+  //printf("cp1");
   int i, exitcode = 0;
   exitThreadArray[0] = true;
   //printf("cp2");
@@ -141,6 +142,7 @@ EnqueueExecutables(char *filename)
   for (i=0; i<thread_index; i++) {
     if (!exitThreadArray[i]) break;
   }
+  beginExecTime = stats->totalTicks;
   currentThread->Exit(i==thread_index, exitcode);
 }
 // Data structures needed for the console test.  Threads making

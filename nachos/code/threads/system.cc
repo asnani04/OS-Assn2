@@ -26,6 +26,27 @@ bool initializedConsoleSemaphores;
 bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 
 int schedAlg;
+
+unsigned totalBusyTime = 0;
+unsigned beginExecTime = 0;
+unsigned totalExecTime = 0;
+double CPUutil = 0.0;
+
+unsigned maxBurst = 0;
+unsigned minBurst = 1000;
+double avgBurst = 0.0;
+unsigned numBurst = 0;
+//unsigned waitBegin = 0;
+//unsigned waitEnd = 0;
+unsigned totalWait = 0;
+unsigned numWaits = 0;
+
+double avgWait = 0.0;
+unsigned maxThreadCom = 0;
+unsigned minThreadCom = 0;
+double avgThreadCom = 0.0;
+double varThreadCom = 0.0;
+
 TimeSortedWaitQueue *sleepQueueHead;    // Needed to implement SC_Sleep
 
 #ifdef FILESYS_NEEDED
@@ -162,8 +183,8 @@ Initialize(int argc, char **argv)
     interrupt = new Interrupt;			// start up interrupt handling
     scheduler = new NachOSscheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
-	timer = new Timer(TimerInterruptHandler, 0, randomYield);
-	schedAlg = 0;
+    timer = new Timer(TimerInterruptHandler, 0, randomYield);
+    schedAlg = 1;
     threadToBeDestroyed = NULL;
 
     // We didn't explicitly allocate the current thread we are running in.

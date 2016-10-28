@@ -227,9 +227,17 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
     NachOSThread *nextThread;
 
     status = BLOCKED;
-    if (runningStart != 0) {
+    if (runningStart != 0 && runningStart != stats->totalTicks) {
       runningEnd = stats->totalTicks;
       previousBurst = runningEnd - runningStart;
+      totalBusyTime += previousBurst;
+      if (previousBurst > maxBurst) {
+	maxBurst = previousBurst;
+      }
+      if (previousBurst < minBurst) {
+	minBurst = previousBurst;
+      }
+      numBurst += 1;
       //printf("Prev Burst %d\n", previousBurst);
       predBurst = (predBurst + previousBurst) / 2;
       runningStart = 0;
@@ -324,9 +332,17 @@ NachOSThread::PutThreadToSleep ()
     DEBUG('t', "Sleeping thread \"%s\" with pid %d\n", getName(), pid);
 
     status = BLOCKED;
-    if (runningStart != 0) {
+    if (runningStart != 0 && stats->totalTicks != runningStart) {
       runningEnd = stats->totalTicks;
       previousBurst = runningEnd - runningStart;
+      totalBusyTime += previousBurst;
+      if (previousBurst > maxBurst) {
+	maxBurst = previousBurst;
+      }
+      if (previousBurst < minBurst) {
+	minBurst = previousBurst;
+      }
+      numBurst += 1;
       //printf("Prev Burst %d\n", previousBurst);
       predBurst = (predBurst + previousBurst) / 2;
       runningStart = 0;

@@ -108,6 +108,11 @@ class NachOSThread {
     void CheckOverflow();   			// Check if thread has 
 						// overflowed its stack
     void setStatus(ThreadStatus st) { status = st; }
+
+    void getStatus() {
+      printf("Status of thread %d is %d\n", pid, status);
+    }
+
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
 
@@ -140,6 +145,8 @@ class NachOSThread {
     int runningTime ;
     int previousBurst;
     int predBurst;
+    unsigned waitBegin;
+    unsigned waitEnd;
 
   private:
     // some of the private data for this class is listed above

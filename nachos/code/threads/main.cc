@@ -102,7 +102,7 @@ main(int argc, char **argv)
 	        ConsoleTest(NULL, NULL);
 	} else if (!strcmp(*argv, "-F")) {       // run a list of user programs 
 	    	ASSERT(argc > 1);
-	    	EnqueueExecutables(*(argv+1));
+		EnqueueExecutables(*(argv+1));
 		argCount = 2;
 		
 		//system_call_Exit(0);

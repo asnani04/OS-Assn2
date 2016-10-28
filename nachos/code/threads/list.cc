@@ -17,6 +17,7 @@
 
 #include "copyright.h"
 #include "list.h"
+#include "thread.h"
 
 //----------------------------------------------------------------------
 // ListElement::ListElement
@@ -180,6 +181,8 @@ List::SortedInsert(void *item, int sortKey)
 {
     ListElement *element = new ListElement(item, sortKey);
     ListElement *ptr;		// keep track
+    NachOSThread *thread = (NachOSThread *)item;
+    //printf("Burst : %d\n", sortKey);
 
     if (IsEmpty()) {	// if list is empty, put
         first = element;
@@ -240,9 +243,15 @@ void
 List::PrintPredBursts()
 {
   ListElement *element = first;
+  printf("Printing PredBurst! \n");
+  if (IsEmpty()) {
+    printf("Ready list is empty\n");
+    return;
+  }
   while(element != NULL)
     {
-      printf("Element %d\n", element->key);
+      NachOSThread *thread = (NachOSThread *) element->item;
+      printf(" %d has PredBurst %d \n", thread->GetPID(), element->key);
       element = element->next;
     }
 

@@ -33,6 +33,18 @@ extern Timer *timer;				// the hardware alarm clock
 extern unsigned numPagesAllocated;              // number of physical frames allocated
 
 extern int schedAlg;
+
+extern unsigned totalExecTime;
+extern unsigned beginExecTime;
+extern unsigned totalBusyTime;
+extern double CPUutil;
+extern unsigned numBurst;
+extern unsigned maxBurst;
+extern unsigned minBurst;
+extern double avgBurst;
+extern unsigned totalWait;
+extern unsigned numWaits;
+
 extern NachOSThread *threadArray[];  			// Array of thread pointers
 extern unsigned thread_index;                  // Index into this array (also used to assign unique pid)
 extern bool initializedConsoleSemaphores;       // Used to initialize the semaphores for console I/O exactly once
