@@ -28,6 +28,8 @@ bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 int schedAlg;
 int basePriorities[MAX_THREAD_COUNT];
 int cpuUsage[MAX_THREAD_COUNT];
+int threadStart[MAX_THREAD_COUNT];
+int threadEnd[MAX_THREAD_COUNT];
 int quantum = 100;
 //int avgBurstTestLoop=120;
 unsigned totalBusyTime = 0;
@@ -45,8 +47,11 @@ unsigned totalWait = 0;
 unsigned numWaits = 0;
 
 double avgWait = 0.0;
+unsigned totThreadCom = 0;
+unsigned threadsTot = 0;
 unsigned maxThreadCom = 0;
-unsigned minThreadCom = 0;
+unsigned minThreadCom = 100000;
+unsigned sumSquares = 0.0;
 double avgThreadCom = 0.0;
 double varThreadCom = 0.0;
 
@@ -156,6 +161,8 @@ Initialize(int argc, char **argv)
       threadArray[i] = NULL; exitThreadArray[i] = false; 
       basePriorities[i] = 50;
       cpuUsage[i] = 0;
+      threadStart[i] = 0;
+      threadEnd[i] = 0;
     }
     thread_index = 0;
 

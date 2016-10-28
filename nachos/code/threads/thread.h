@@ -91,6 +91,7 @@ class NachOSThread {
     int predBurst;
     unsigned waitBegin;
     unsigned waitEnd;
+    //unsigned startTime;
     //unsigned hulla;
 
     //int priority;

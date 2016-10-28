@@ -44,6 +44,14 @@ Statistics::Print()
   printf("Total Wait Time: %d, Number of Waits: %d\n" , totalWait, numWaits);
   avgWait = (double) totalWait / numWaits ;
   printf("Avg Wait Time: %lf\n", avgWait);
+  
+  printf("Total Thread Completion Time: %d\n", totThreadCom);
+  printf("total threads completed: %d\n", threadsTot);
+  avgThreadCom = (double) totThreadCom / threadsTot;
+  printf("Avg Thread Completion Time: %lf\n", avgThreadCom);
+  printf("Max, min Thread Completion Times: %d, %d\n", maxThreadCom, minThreadCom);
+  varThreadCom = (double) sumSquares / threadsTot;
+  printf("Variance of thread completion times: %lf\n", varThreadCom);
 
   printf("Ticks: total %d, idle %d, system %d, user %d\n", totalTicks, 
 	idleTicks, systemTicks, userTicks);

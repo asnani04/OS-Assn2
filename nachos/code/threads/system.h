@@ -50,6 +50,15 @@ extern double avgWait;
 extern NachOSThread *threadArray[];  			// Array of thread pointers
 extern int cpuUsage[];
 extern int basePriorities[];
+extern int threadStart[];
+extern int threadEnd[];
+extern unsigned totThreadCom;
+extern unsigned threadsTot;
+extern double avgThreadCom;
+extern unsigned maxThreadCom;
+extern unsigned minThreadCom;
+extern double varThreadCom;
+extern unsigned sumSquares;
 
 extern unsigned thread_index;                  // Index into this array (also used to assign unique pid)
 extern bool initializedConsoleSemaphores;       // Used to initialize the semaphores for console I/O exactly once

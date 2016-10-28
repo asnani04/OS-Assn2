@@ -49,6 +49,7 @@ NachOSThread::NachOSThread(char* threadName)
 
     threadArray[thread_index] = this;
     pid = thread_index;
+    threadStart[thread_index] = stats->totalTicks;
     thread_index++;
     //hulla = 0;
     ASSERT(thread_index < MAX_THREAD_COUNT);
@@ -183,6 +184,8 @@ NachOSThread::FinishThread ()
     ASSERT(this == currentThread);
     
     DEBUG('t', "Finishing thread \"%s\" with pid %d\n", getName(), pid);
+
+    
     
     threadToBeDestroyed = currentThread;
     PutThreadToSleep();					// invokes SWITCH
@@ -255,6 +258,18 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
     }
     currentlyRunning = false;
 
+    threadEnd[pid] = stats->totalTicks;
+    totThreadCom += threadEnd[pid];
+    threadsTot++;
+    sumSquares += threadEnd[pid]*threadEnd[pid];
+
+    if (threadEnd[pid] > maxThreadCom) {
+      maxThreadCom = threadEnd[pid];
+    }
+    if (threadEnd[pid] < minThreadCom) {
+      minThreadCom = threadEnd[pid];
+    }
+    
     // Set exit code in parent's structure provided the parent hasn't exited
     if (ppid != -1) {
        ASSERT(threadArray[ppid] != NULL);
