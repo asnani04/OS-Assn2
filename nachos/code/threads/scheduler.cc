@@ -77,6 +77,11 @@ NachOSscheduler::ThreadIsReadyToRun (NachOSThread *thread)
       readyThreadList->SortedInsert((void *)thread, thread->predBurst);
       //printf("Inserting thread %d with burst %d in Ready List.\n", thread->GetPID(), thread->predBurst);
     }
+
+    if (schedAlg >= 7 && schedAlg <= 10) {
+      readyThreadList->SortedInsert((void *)thread, 
+				    basePriorities[thread->GetPID()] + cpuUsage[thread->GetPID()]);
+    }
     else if (schedAlg == 1) {
       readyThreadList->Append((void *)thread);
     }
@@ -101,6 +106,10 @@ NachOSscheduler::FindNextThreadToRun ()
       //printf("This predBurst: %d\n", currentThread->predBurst);
       //Print();
     }
+    return nextThread;
+  }
+  if (schedAlg >= 7 && schedAlg <= 10) {
+    NachOSThread *nextThread = (NachOSThread *)readyThreadList->SortedRemove(NULL);
     return nextThread;
   }
   return (NachOSThread *)readyThreadList->Remove();
@@ -134,6 +143,7 @@ NachOSscheduler::Schedule (NachOSThread *nextThread)
     
     oldThread->CheckOverflow();		    // check if the old thread
 					    // had an undetected stack overflow
+
 
     //printf("schedule cp 1\n");
     currentThread = nextThread;		    // switch to the next thread

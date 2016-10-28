@@ -46,6 +46,9 @@ extern unsigned totalWait;
 extern unsigned numWaits;
 
 extern NachOSThread *threadArray[];  			// Array of thread pointers
+extern int cpuUsage[];
+extern int basePriorities[];
+
 extern unsigned thread_index;                  // Index into this array (also used to assign unique pid)
 extern bool initializedConsoleSemaphores;       // Used to initialize the semaphores for console I/O exactly once
 extern bool exitThreadArray[];          // Marks exited threads

@@ -39,6 +39,8 @@ NachOSThread::NachOSThread(char* threadName)
     name = threadName;
     stackTop = NULL;
     stack = NULL;
+    //priority = 50;
+    //cpuUsage = 0;
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
@@ -48,6 +50,7 @@ NachOSThread::NachOSThread(char* threadName)
     threadArray[thread_index] = this;
     pid = thread_index;
     thread_index++;
+    //hulla = 0;
     ASSERT(thread_index < MAX_THREAD_COUNT);
     if (currentThread != NULL) {
        ppid = currentThread->GetPID();
@@ -66,6 +69,14 @@ NachOSThread::NachOSThread(char* threadName)
     runningTime = 0;
     predBurst = 1;
     previousBurst = 0;
+    //hulla = 0;
+}
+
+void
+NachOSThread::AddPriority(NachOSThread *thread, int p)
+{
+  basePriorities[thread->GetPID()] = p + 50;
+
 }
 
 //----------------------------------------------------------------------

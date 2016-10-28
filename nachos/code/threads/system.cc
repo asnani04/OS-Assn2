@@ -26,6 +26,8 @@ bool initializedConsoleSemaphores;
 bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 
 int schedAlg;
+int basePriorities[MAX_THREAD_COUNT];
+int cpuUsage[MAX_THREAD_COUNT];
 
 unsigned totalBusyTime = 0;
 unsigned beginExecTime = 0;
@@ -125,7 +127,11 @@ Initialize(int argc, char **argv)
     initializedConsoleSemaphores = false;
     numPagesAllocated = 0;
 
-    for (i=0; i<MAX_THREAD_COUNT; i++) { threadArray[i] = NULL; exitThreadArray[i] = false; }
+    for (i=0; i<MAX_THREAD_COUNT; i++) { 
+      threadArray[i] = NULL; exitThreadArray[i] = false; 
+      basePriorities[i] = 50;
+      cpuUsage[i] = 0;
+    }
     thread_index = 0;
 
     sleepQueueHead = NULL;

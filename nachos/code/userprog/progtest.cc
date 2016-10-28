@@ -102,6 +102,8 @@ EnqueueExecutables(char *filename)
 	  priority = 100;
 	
 	NachOSThread* thread = makeThread(exec, thread_index);
+	currentThread->AddPriority(thread, priority);
+
 	thread->Schedule();
 	
 	printf("executable: %s, execCursor: %d, priority: %d\n", exec, execCursor, priority);

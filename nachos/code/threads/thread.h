@@ -83,6 +83,19 @@ class NachOSThread {
     int machineState[MachineStateSize];  // all registers except for stackTop
 
   public:
+    
+    int runningStart;
+    int runningEnd;
+    int runningTime ;
+    int previousBurst;
+    int predBurst;
+    unsigned waitBegin;
+    unsigned waitEnd;
+    //unsigned hulla;
+
+    //int priority;
+    
+    
     NachOSThread(char* debugName);		// initialize a Thread 
     ~NachOSThread(); 				// deallocate a Thread
 					// NOTE -- thread being deleted
@@ -133,6 +146,7 @@ class NachOSThread {
     void AllocateThreadStack(VoidFunctionPtr func, int arg);  // Allocate a stack for the simulated thread context. The thread starts execution at
                                                         // func (in kernel space) with input argument arg.
 
+    void AddPriority(NachOSThread *thread, int p);
     void Startup();                                     // Called by the startup function of SYScall_Fork to cleanly start a forked child after it is scheduled
 
     void SortedInsertInWaitQueue (unsigned when);       // Called by SYScall_Sleep handler
@@ -140,14 +154,8 @@ class NachOSThread {
     void IncInstructionCount();
     unsigned GetInstructionCount();
     
-    int runningStart;
-    int runningEnd;
-    int runningTime ;
-    int previousBurst;
-    int predBurst;
-    unsigned waitBegin;
-    unsigned waitEnd;
-
+    
+    
   private:
     // some of the private data for this class is listed above
     
