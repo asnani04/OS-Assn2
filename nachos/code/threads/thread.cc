@@ -61,14 +61,11 @@ NachOSThread::NachOSThread(char* threadName)
     for (i=0; i<MAX_CHILD_COUNT; i++) exitedChild[i] = false;
 
     instructionCount = 0;
-    
     runningStart = 0;
     runningEnd = 0;
     runningTime = 0;
     predBurst = 1;
     previousBurst = 0;
-    waitBegin = 0;
-    waitEnd = 0;
 }
 
 //----------------------------------------------------------------------
